@@ -1,11 +1,11 @@
 ---
 video:
-    # Available options: prores, mjpeg
+    # prores, mjpeg
     video_codec: mjpeg
 audio:
-    # Available options: True, False
+    # True, False
     enable_audio: True
-    # Available options: pcm_s16le (16-bit), pcm_s24le (24-bit), pcm_f32le (32-bit float), copy (keep input codec)
+    # pcm_s16le (16-bit), pcm_s24le (24-bit), pcm_f32le (32-bit float), copy (keep input codec)
     audio_codec: pcm_s16le
-    # Available options: 44100, 48000, 96000, 192000, 0 (keep input samplerate)
+    # 44100, 48000, 96000, 192000, 0 (keep input samplerate)
     audio_samplerate: 0

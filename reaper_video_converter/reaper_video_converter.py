@@ -67,10 +67,12 @@ except puremagic.main.PureError:
 
 # Declare YAML config schema
 schema = yamale.make_schema(content="""
-video_codec: enum("prores", "mjpeg")
-enable_audio: bool()
-audio_codec: enum("pcm_s16le", "pcm_s24le", "pcm_f32le", "copy", required=False, none=False)
-audio_samplerate: enum(44100, 48000, 96000, 192000, 0, required=False, none=False)
+video:
+    video_codec: enum("prores", "mjpeg")
+audio:
+    enable_audio: bool()
+    audio_codec: enum("pcm_s16le", "pcm_s24le", "pcm_f32le", "copy", required=False, none=False)
+    audio_samplerate: enum(44100, 48000, 96000, 192000, 0, required=False, none=False)
 """, parser="ruamel")
 
 # Check config path and validate it
@@ -105,10 +107,10 @@ except (ValueError, ParserError, YAMLError) as e:
     sys.exit(1)
 
 # Get config values
-video_codec: str = config.get("video_codec")
-enable_audio: bool = config.get("enable_audio")
-audio_codec: str = config.get("audio_codec", "copy")
-audio_samplerate: int = config.get("audio_samplerate", 0)
+video_codec: str = config.get("video").get("video_codec")
+enable_audio: bool = config.get("audio").get("enable_audio")
+audio_codec: str = config.get("audio").get("audio_codec", "copy")
+audio_samplerate: int = config.get("audio").get("audio_samplerate", 0)
 
 # Generate output file path and check if it exists
 output_file: Path = input_file.parent / (input_file.stem + "_" + video_codec.upper() + input_file.suffix)

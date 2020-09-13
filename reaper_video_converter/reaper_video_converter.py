@@ -64,7 +64,7 @@ enable_audio: bool = config.get("audio").get("enable_audio")
 audio_codec: str = config.get("audio").get("audio_codec", "copy")
 audio_samplerate: int = config.get("audio").get("audio_samplerate", 0)
 
-# Check if exists in PATH or in the same folder as the application
+# Check if FFmpeg exists in PATH or in the same folder as the application
 if (Path(application_path).resolve() / "ffmpeg.exe").is_file():
     ffmpeg_path = Path(application_path).resolve() / "ffmpeg.exe"
     logger.info("FFmpeg executable found! 👍")

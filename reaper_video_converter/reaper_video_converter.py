@@ -17,6 +17,53 @@ if getattr(sys, 'frozen', False):
 else:
     application_path = os.path.dirname(os.path.abspath(__file__))
 
+# Declare YAML config schema
+schema = yamale.make_schema(content="""
+video:
+    video_codec: enum("prores", "mjpeg")
+audio:
+    enable_audio: bool()
+    audio_codec: enum("pcm_s16le", "pcm_s24le", "pcm_f32le", "copy", required=False, none=False)
+    audio_samplerate: enum(44100, 48000, 96000, 192000, 0, required=False, none=False)
+""", parser="ruamel")
+
+# Check config path and validate it
+config_path = Path("reaper_video_converter.yaml").resolve()
+if config_path.is_file():
+    logger.info("Config found! 👍")
+    try:
+        data = yamale.make_data(config_path, parser="ruamel")
+        yamale.validate(schema, data)
+        logger.info("Config validation success! 👍")
+    except (ParserError, YAMLError) as e:
+        logger.error(f"Something wrong with the config file (either not YAML or invalid YAML). 😭\n{str(e)}")
+        input("\nPress Enter to exit...\n\n")
+        sys.exit(1)
+    except ValueError as e:
+        logger.error(f"Config validation failed. 😭\n{str(e)}")
+        input("\nPress Enter to exit...\n\n")
+        sys.exit(1)
+else:
+    logger.error(f"Config file is not a file or doesn't exist. 😭\n{config_path}")
+    input("\nPress Enter to exit...\n\n")
+    sys.exit(1)
+
+# Open config
+yaml = YAML()
+try:
+    config = yaml.load(config_path)
+    logger.info(f"Config successfully loaded! 👍")
+except (ValueError, ParserError, YAMLError) as e:
+    logger.error(f"Something wrong with reading the config file. 😭\n{str(e)}")
+    input("\nPress Enter to exit...\n\n")
+    sys.exit(1)
+
+# Get config values
+video_codec: str = config.get("video").get("video_codec")
+enable_audio: bool = config.get("audio").get("enable_audio")
+audio_codec: str = config.get("audio").get("audio_codec", "copy")
+audio_samplerate: int = config.get("audio").get("audio_samplerate", 0)
+
 # Check if exists in PATH or in the same folder as the application
 if (Path(application_path).resolve() / "ffmpeg.exe").is_file():
     ffmpeg_path = Path(application_path).resolve() / "ffmpeg.exe"
@@ -64,53 +111,6 @@ try:
         logger.warning("Input file may not be a video, other errors are possible.")
 except puremagic.main.PureError:
     logger.warning("Couldn't check input file MIME type, other errors are possible.")
-
-# Declare YAML config schema
-schema = yamale.make_schema(content="""
-video:
-    video_codec: enum("prores", "mjpeg")
-audio:
-    enable_audio: bool()
-    audio_codec: enum("pcm_s16le", "pcm_s24le", "pcm_f32le", "copy", required=False, none=False)
-    audio_samplerate: enum(44100, 48000, 96000, 192000, 0, required=False, none=False)
-""", parser="ruamel")
-
-# Check config path and validate it
-config_path = Path("reaper_video_converter.yaml").resolve()
-if config_path.is_file():
-    logger.info("Config found! 👍")
-    try:
-        data = yamale.make_data(config_path, parser="ruamel")
-        yamale.validate(schema, data)
-        logger.info("Config validation success! 👍")
-    except (ParserError, YAMLError) as e:
-        logger.error(f"Something wrong with the config file (either not YAML or invalid YAML). 😭\n{str(e)}")
-        input("\nPress Enter to exit...\n\n")
-        sys.exit(1)
-    except ValueError as e:
-        logger.error(f"Config validation failed. 😭\n{str(e)}")
-        input("\nPress Enter to exit...\n\n")
-        sys.exit(1)
-else:
-    logger.error(f"Config file is not a file or doesn't exist. 😭\n{config_path}")
-    input("\nPress Enter to exit...\n\n")
-    sys.exit(1)
-
-# Open config
-yaml = YAML()
-try:
-    config = yaml.load(config_path)
-    logger.info(f"Config successfully loaded! 👍")
-except (ValueError, ParserError, YAMLError) as e:
-    logger.error(f"Something wrong with reading the config file. 😭\n{str(e)}")
-    input("\nPress Enter to exit...\n\n")
-    sys.exit(1)
-
-# Get config values
-video_codec: str = config.get("video").get("video_codec")
-enable_audio: bool = config.get("audio").get("enable_audio")
-audio_codec: str = config.get("audio").get("audio_codec", "copy")
-audio_samplerate: int = config.get("audio").get("audio_samplerate", 0)
 
 # Generate output file path and check if it exists
 output_file: Path = input_file.parent / (input_file.stem + "_" + video_codec.upper() + input_file.suffix)

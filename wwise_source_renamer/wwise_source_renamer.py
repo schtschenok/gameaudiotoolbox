@@ -23,10 +23,11 @@ schema = yamale.make_schema(content="""
 options:
     wwise_project_path: str()
     rename_sound_object: bool()
+    use_perforce: bool()
 perforce:
-    port: str()
-    user: str()
-    client: str()
+    port: str(required=False)
+    user: str(required=False)
+    client: str(required=False)
 """, parser="ruamel")
 
 # Check config path and validate it
@@ -61,36 +62,9 @@ except (ValueError, ParserError, YAMLError) as e:
     sys.exit(1)
 
 # Get config values
-wwise_project_path: str = config.get("options").get("wwise_project_path")
+wwise_project_path: Path = Path(config.get("options").get("wwise_project_path")).resolve()
 rename_sound_object: bool = config.get("options").get("rename_sound_object")
-p4_host: str = config.get("perforce").get("host")
-p4_port: int = config.get("perforce").get("port")
-p4_user: str = config.get("perforce").get("user")
-p4_client: str = config.get("perforce").get("client")
-
-
-class WwiseSourceRenamer:
-    def __init__(self, project_path, rename_sound_object_bool):
-        self._project_path = project_path
-        self._changed_files: list = []
-        self._changed_files_validated: list = []
-        self._rename_sound_object: bool = rename_sound_object_bool
-
-        self.validate_wwise_project()
-
-    def validate_wwise_project(self):
-        print(f"Validate Wwise project: {self._project_path}")
-
-    def rename_wwise_source(self, src_path, dest_path):
-        self._changed_files.append(dest_path)
-        # TODO: Write implementation
-        print(f"Rename {src_path} to {dest_path} in Wwise project files.")
-
-    def get_changed_files(self):
-        for file in self._changed_files:
-            if (file_path := Path(file).resolve()).is_file():
-                self._changed_files_validated.append(file_path)
-        return self._changed_files_validated
+use_perforce: bool = config.get("options").get("use_perforce")
 
 
 class OnMovedEventHandler(FileSystemEventHandler):
@@ -101,27 +75,76 @@ class OnMovedEventHandler(FileSystemEventHandler):
             renamer.rename_wwise_source(event.src_path, event.dest_path)
 
 
+class WwiseSourceRenamer:
+    def __init__(self, project_path: Path, rename_sound_object_bool: bool):
+        self._project_path = project_path
+        self._originals_sfx_path = self._project_path / "Originals" / "SFX"
+        self._am_path = self._project_path / "Actor-Mixer Hierarchy"
+        self._changed_files: list = []
+        self._changed_files_validated: list = []
+        self._rename_sound_object: bool = rename_sound_object_bool
+
+        self.validate_wwise_project()
+        self.run_watchdog()
+
+    def run_watchdog(self):
+        observer = Observer()
+        observer.schedule(OnMovedEventHandler(), str(self._originals_sfx_path), recursive=True)
+        observer.start()
+        logger.info(f"Started watching this directory: {self._originals_sfx_path}")
+        logger.info(f"Press Ctrl+C to stop.")
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+            logger.info(f"Stopped watching this directory: {self._originals_sfx_path}")
+        observer.join()
+
+    def validate_wwise_project(self):
+        if not self._project_path.is_dir():
+            logger.error(f"Wwise Project path does not exist. 😭\n{self._project_path}")
+            input("\nPress Enter to exit...\n\n")
+            sys.exit(1)
+
+        if list(self._project_path.rglob("*.wproj")) and self._originals_sfx_path.is_dir() and self._am_path.is_dir():
+            logger.info(f"Wwise Project found! 👍")
+        else:
+            logger.error(f"There is no Wwise Project at the path specified. 😭\n{self._project_path}")
+            input("\nPress Enter to exit...\n\n")
+            sys.exit(1)
+
+    def rename_wwise_source(self, src_path, dest_path):
+        self._changed_files.append(dest_path)
+        src_path = Path(src_path).resolve().relative_to(self._originals_sfx_path)
+        dest_path = Path(dest_path).resolve().relative_to(self._originals_sfx_path)
+
+        print(f"Rename {src_path} to {dest_path} in Wwise project files.")
+
+    def get_changed_files(self):
+        for file in self._changed_files:
+            if (file_path := Path(file).resolve()).is_file():
+                self._changed_files_validated.append(file_path)
+        return self._changed_files_validated
+
+
 renamer = WwiseSourceRenamer(wwise_project_path, rename_sound_object)
 
-observer = Observer()
-observer.schedule(OnMovedEventHandler(), wwise_project_path, recursive=True)
-observer.start()
-logger.info(f"Started watching this directory: {wwise_project_path}")
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    observer.stop()
-observer.join()
+if not use_perforce:
+    input("\nPress Enter to close...\n\n")
+    sys.exit(0)
+
+p4_host: str = config.get("perforce").get("host")
+p4_port: int = config.get("perforce").get("port")
+p4_user: str = config.get("perforce").get("user")
+p4_client: str = config.get("perforce").get("client")
 
 # P4 initialization and credentials
 p4 = P4()
 p4.port = str(p4_port)
 p4.user = p4_user
 p4.client = p4_client
-
-# TODO: Remove
-exit(0)
 
 # Connect to P4
 try:

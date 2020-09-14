@@ -1,7 +1,9 @@
 options:
-    wwise_project_path: /Users/tyoma/Projects/gameaudiotoolbox
+    wwise_project_path: C:\Users\tyoma\Documents\WwiseProjects\Test_Shareset
     # True, False
     rename_sound_object: False
+    # True, False
+    use_perforce: False
 perforce:
     port: 10.0.1.10:16662
     user: tyoma

@@ -113,7 +113,7 @@ except puremagic.main.PureError:
     logger.warning("Couldn't check input file MIME type, other errors are possible.")
 
 # Generate output file path and check if it exists
-output_file: Path = input_file.parent / (input_file.stem + "_" + video_codec.upper() + input_file.suffix)
+output_file: Path = input_file.parent / (input_file.stem + "_" + video_codec.upper() + ".mov")
 if output_file.is_file():
     logger.error("Output file exists! Please move it, delete it, or use another video codec. 😭")
     input("\nPress Enter to exit...\n\n")

@@ -13,7 +13,8 @@ from ruamel.yaml.parser import ParserError
 # Get application path
 if getattr(sys, 'frozen', False):
     # noinspection PyUnresolvedReferences, PyProtectedMember
-    application_path = sys._MEIPASS
+    # application_path = sys._MEIPASS
+    application_path = sys.executable
 else:
     application_path = os.path.dirname(os.path.abspath(__file__))
 

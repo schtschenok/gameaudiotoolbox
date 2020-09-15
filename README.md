@@ -12,11 +12,11 @@ I'm not a good programmer, so don't expect any production-ready code here. Use i
 5. Use generated batch files from `BatchFiles` folder following the instructions for each script.
 
 ## FAQ
-**Q**: Where I can find the instructions for scripts?
+**Q**: Where I can find the instructions for scripts?<br>
 **A**: In `README.md` files in their respective folder. 
 
-**Q**: Can I move generated scripts from the `./BatchFiles` to somewhere else?
+**Q**: Can I move generated scripts from the `./BatchFiles` to somewhere else?<br>
 **A**: Yes!
 
-**Q**: Can I move the Python installation from the project folder?
+**Q**: Can I move the Python installation from the project folder?<br>
 **A**: No, it won't work, but you can move `PythonInstall.bat`, `PythonInstallPackages.bat`, `python_version.txt`, and `requirements.txt` to any folder on your PC and generate the Python environment there.

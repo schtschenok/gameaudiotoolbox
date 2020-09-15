@@ -2,6 +2,11 @@ loguru
 yamale
 puremagic
 ruamel.yaml
-loguru
 watchdog
 p4python
+pip
+argparse
+wheel
+PyYAML
+pathtools
+setuptools

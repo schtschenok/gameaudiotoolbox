@@ -10,13 +10,8 @@ from loguru import logger
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.parser import ParserError
 
-# Get application path
-if getattr(sys, 'frozen', False):
-    # noinspection PyUnresolvedReferences, PyProtectedMember
-    # application_path = sys._MEIPASS
-    application_path = Path(sys.executable).parent
-else:
-    application_path = os.path.dirname(os.path.abspath(__file__))
+# Get script folder path
+script_dir = Path(__file__).parent.resolve()
 
 # Declare YAML config schema
 schema = yamale.make_schema(content="""
@@ -29,7 +24,8 @@ audio:
 """, parser="ruamel")
 
 # Check config path and validate it
-config_path = Path("reaper_video_converter.yaml").resolve()
+config_path = script_dir / Path("reaper_video_converter.yaml")
+print(config_path)
 if config_path.is_file():
     logger.info("Config found! 👍")
     try:
@@ -66,11 +62,11 @@ audio_codec: str = config.get("audio").get("audio_codec", "copy")
 audio_samplerate: int = config.get("audio").get("audio_samplerate", 0)
 
 # Check if FFmpeg exists in PATH or in the same folder as the application
-if (Path(application_path).resolve() / "ffmpeg.exe").is_file():
-    ffmpeg_path = Path(application_path).resolve() / "ffmpeg.exe"
+if (script_dir / "ffmpeg.exe").is_file():
+    ffmpeg_path = script_dir / "ffmpeg.exe"
     logger.info("FFmpeg executable found! 👍")
-elif (Path(application_path).resolve() / "ffmpeg").is_file():
-    ffmpeg_path = Path(application_path).resolve() / "ffmpeg"
+elif (script_dir / "ffmpeg").is_file():
+    ffmpeg_path = script_dir / "ffmpeg"
     logger.info("FFmpeg executable found! 👍")
 elif which("ffmpeg.exe"):
     ffmpeg_path = Path(which("ffmpeg.exe")).resolve()

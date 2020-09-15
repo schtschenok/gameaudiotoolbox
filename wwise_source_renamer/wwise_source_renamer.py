@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 from pathlib import Path
@@ -11,12 +10,8 @@ from ruamel.yaml.parser import ParserError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# Get application path
-if getattr(sys, 'frozen', False):
-    # noinspection PyUnresolvedReferences, PyProtectedMember
-    application_path = sys._MEIPASS
-else:
-    application_path = os.path.dirname(os.path.abspath(__file__))
+# Get script folder path
+script_dir = Path(__file__).parent.resolve()
 
 # Declare YAML config schema
 schema = yamale.make_schema(content="""

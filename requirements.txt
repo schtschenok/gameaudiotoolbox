@@ -1,0 +1,7 @@
+loguru
+yamale
+puremagic
+ruamel.yaml
+loguru
+watchdog
+p4python

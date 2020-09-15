@@ -13,7 +13,7 @@ I'm not a good programmer, so don't expect any production-ready code here. Use i
 
 ## FAQ
 **Q**: Where I can find the instructions for scripts?<br>
-**A**: In `README.md` files in their respective folder. 
+**A**: In `README.md` files in their respective folders. 
 
 **Q**: Can I move generated scripts from the `./BatchFiles` to somewhere else?<br>
 **A**: Yes!

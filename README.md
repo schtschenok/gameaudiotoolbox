@@ -17,7 +17,7 @@ I'm not a professional programmer, so don't expect any production-ready code her
 **A**: Yes!
 
 **Q**: Can I move the Python installation from the project folder?<br>
-**A**: No, it won't work, but you can move `Install.bat`, `Install.pc1`, `python_version.txt`, and `requirements.txt` to any folder on your PC and generate the Python environment there.
+**A**: No, it won't work, but you can move `Install.bat`, `Install.pc1`, `python_version.txt`, and `requirements.txt` to any folder on your PC and generate the Python environment there. Batch script generation will break though, so I don't recommend doing this.
 
 ## TODO
 * Rewrite scripts with a much better and more uniform script structure

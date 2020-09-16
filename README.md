@@ -21,3 +21,4 @@ I'm not a professional programmer, so don't expect any production-ready code her
 
 ## TODO
 * Rewrite scripts with a much better and more uniform script structure
+* Download FFmpeg automatically for Reaper Video Converter
